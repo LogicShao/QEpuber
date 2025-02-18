@@ -1,4 +1,5 @@
 from ebookparser import load_epub, parse_toc
+import json
 
 
 class EBookChapter:
@@ -8,10 +9,10 @@ class EBookChapter:
 
 
 class EBook:
-    def __init__(self, epub_path):
+    def __init__(self, epub_path, now_chapter_idx=0):
         self.epub_path = epub_path
         self.cache_folder, self.chapter_path_list = load_epub(epub_path)
-        self._now_chapter_idx = 0
+        self._now_chapter_idx = now_chapter_idx
         self.toc = parse_toc(self.cache_folder)
 
     def next_chapter(self):
@@ -31,3 +32,23 @@ class EBook:
 
     def get_chapter_count(self):
         return len(self.chapter_path_list)
+
+
+last_read_JSON_path = "eBookCache/last_read.json"
+
+
+def save_EBook_in_JSON(eBook: EBook | None = None):
+    if eBook is None:
+        return
+    with open(last_read_JSON_path, "w") as f:
+        json.dump({"epub_path": eBook.epub_path,
+                   "now_chapter_idx": eBook._now_chapter_idx}, f)
+
+
+def load_EBook_from_JSON() -> EBook | None:
+    try:
+        with open(last_read_JSON_path, "r") as f:
+            last_read = json.load(f)
+    except FileNotFoundError:
+        return None
+    return EBook(last_read["epub_path"], last_read["now_chapter_idx"])

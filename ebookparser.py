@@ -94,7 +94,7 @@ def load_epub(epub_file):
     return cache_folder, chapter_path_list  # 返回缓存目录和 HTML 文件路径列表
 
 
-def parse_toc(epub_folder):
+def parse_toc(epub_folder) -> list:
     """解析 toc.ncx，返回目录项列表（[标题, ...]）"""
     toc_path = find_toc_path(epub_folder)
     if toc_path is None or not os.path.exists(toc_path):
