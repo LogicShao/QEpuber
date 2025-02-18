@@ -94,9 +94,9 @@ def load_epub(epub_file):
     return cache_folder, chapter_path_list  # 返回缓存目录和 HTML 文件路径列表
 
 
-def parse_toc(epub_folder) -> list:
-    """解析 toc.ncx，返回目录项列表（[标题, ...]）"""
-    toc_path = find_toc_path(epub_folder)
+def parse_toc(epub_cache_folder) -> list:
+    """解析 toc.ncx，返回目录项列表（[(标题,锚点) ...]）"""
+    toc_path = find_toc_path(epub_cache_folder)
     if toc_path is None or not os.path.exists(toc_path):
         return []
     tree = ET.parse(toc_path)
@@ -105,8 +105,20 @@ def parse_toc(epub_folder) -> list:
     toc = []
     for nav_point in root.findall(".//ncx:navPoint", ns):
         title = nav_point.find(".//ncx:text", ns).text
-        toc.append(title)
+        anchor = nav_point.find(".//ncx:content", ns).attrib["src"]
+        toc.append((title, os.path.join(epub_cache_folder, anchor)))
     return toc
+
+
+def extract_anchors(html_file):
+    """解析 HTML 提取所有的锚点（id 标签）"""
+    anchors = []
+    with open(html_file, "r", encoding="utf-8") as f:
+        soup = BeautifulSoup(f, "html.parser")
+        # 找到所有带 id 的元素（h1, h2, div, span 可能会用作锚点）
+        for tag in soup.find_all(attrs={"id": True}):
+            anchors.append(tag["id"])
+    return anchors
 
 
 warnings.filterwarnings("ignore", category=UserWarning, module="ebooklib.epub")
@@ -121,5 +133,5 @@ if __name__ == "__main__":
     ebook_folder, chapter_path_list = load_epub(epub_path)
     print(f"eBook cache folder: {ebook_folder}")
     toc = parse_toc(ebook_folder)
-    for i, chapter in enumerate(toc):
-        print(f"Chapter {i + 1}: {chapter}")
+    for i, (title, anchor) in enumerate(toc):
+        print(f"{i + 1}. {title} ({anchor})")

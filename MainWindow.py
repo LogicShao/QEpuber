@@ -14,7 +14,12 @@ class MainWindow(qtw.QMainWindow):
         super().__init__()
         self.setup_ui()
 
-        self._book = load_EBook_from_JSON()
+        try:
+            self._book = load_EBook_from_JSON()
+        except FileNotFoundError:
+            logger.info("Saved EBook not found")
+            self._book = None
+
         if self._book is not None:
             self.update_html_browser(self._book.get_chapter())
             self.update_toc_list()
@@ -41,11 +46,14 @@ class MainWindow(qtw.QMainWindow):
         self._menu_bar = self.make_menu_bar()
         self._layout.setMenuBar(self._menu_bar)
 
+        self._tool_bar = self.make_tool_bar()
+        self._layout.addWidget(self._tool_bar)
+
         splitter = qtw.QSplitter(
             qtc.Qt.Orientation.Horizontal, self._central_widget)
 
         self._toc_list = qtw.QListWidget()
-        self._toc_list.itemClicked.connect(self.load_chapter_by_click_toc)
+        self._toc_list.itemClicked.connect(self.load_anchor_by_click_toc)
         splitter.addWidget(self._toc_list)
 
         self._html_browser = self.make_html_browser()
@@ -57,10 +65,19 @@ class MainWindow(qtw.QMainWindow):
 
     def make_tool_bar(self):
         tool_bar = qtw.QToolBar()
-        
+
         prev_button = qtw.QToolButton()
         prev_button.setIcon(qtg.QIcon("./figures/left_arrow.svg"))
         prev_button.clicked.connect(self.prev_chapter)
+
+        next_button = qtw.QToolButton()
+        next_button.setIcon(qtg.QIcon("./figures/right_arrow.svg"))
+        next_button.clicked.connect(self.next_chapter)
+
+        tool_bar.addWidget(prev_button)
+        tool_bar.addWidget(next_button)
+
+        return tool_bar
 
     def make_menu_bar(self):
         menu_bar = qtw.QMenuBar()
@@ -94,31 +111,40 @@ class MainWindow(qtw.QMainWindow):
     def highlight_current_chapter(self):
         if self._book is None:
             return
-        self._toc_list.setCurrentRow(self._book._now_chapter_idx)
+        self._toc_list.setCurrentRow(self._book._now_toc_idx)
 
     def make_html_browser(self):
         html_browser = qtw.QTextBrowser()
         html_browser.setOpenExternalLinks(True)
         return html_browser
 
-    def update_html_browser(self, EBookChapter: EBookChapter | None = None):
-        if EBookChapter is None:
+    def update_html_browser(self, eBookChapter: EBookChapter | None = None):
+        if eBookChapter is None:
             self._html_browser.setSource(
                 qtc.QUrl.fromLocalFile(index_html_path))
             self.setWindowTitle("QEpuber")
             logger.info("Index page loaded")
-        else:
-            self._html_browser.setSource(
-                qtc.QUrl.fromLocalFile(EBookChapter.path))
-            self.setWindowTitle(f"QEpuber - {EBookChapter.title}")
-            logger.info(f"Chapter loaded: {EBookChapter.title}")
+            return
 
-    def load_chapter_by_click_toc(self, item: qtw.QListWidgetItem):
+        self._html_browser.setSource(qtc.QUrl.fromLocalFile(eBookChapter.path))
+        self.setWindowTitle(f"QEpuber - {eBookChapter.title}")
+        logger.info(f"Chapter loaded: {eBookChapter.title}")
+
+        anchor = eBookChapter.get_anchor()
+        if anchor is not None:
+            self._html_browser.scrollToAnchor(anchor)
+            logger.info(f"Anchor loaded: {anchor}")
+
+    def load_anchor_by_click_toc(self, item: qtw.QListWidgetItem):
         if self._book is None:
             return
-        idx = self._toc_list.row(item)
-        self._book._now_chapter_idx = idx
-        self.update_html_browser(self._book.get_chapter())
+        anchor_index = self._toc_list.row(item)
+        chapter_index = self._book.archor_idx_to_chapter_idx[anchor_index]
+        html_path = self._book.chapter_path_list[chapter_index]
+        anchor = self._book.anchor[anchor_index]
+        title = self._book.toc[anchor_index]
+        self._book._now_toc_idx = anchor_index
+        self.update_html_browser(EBookChapter(title, html_path, anchor))
         self.highlight_current_chapter()
 
     def update_toc_list(self):
@@ -148,7 +174,7 @@ class MainWindow(qtw.QMainWindow):
         self.update_html_browser(self._book.get_chapter())
         self.highlight_current_chapter()
 
-        logger.info(f"chapter changed to: {self._book._now_chapter_idx}")
+        logger.info(f"chapter changed to: {self._book._now_toc_idx}")
 
     def prev_chapter(self):
         if self._book is None:
@@ -160,4 +186,4 @@ class MainWindow(qtw.QMainWindow):
         self.update_html_browser(self._book.get_chapter())
         self.highlight_current_chapter()
 
-        logger.info(f"chapter changed to: {self._book._now_chapter_idx}")
+        logger.info(f"chapter changed to: {self._book._now_toc_idx}")
