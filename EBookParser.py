@@ -96,17 +96,18 @@ def load_epub(epub_file):
 
 def parse_toc(epub_cache_folder) -> list:
     """解析 toc.ncx，返回目录项列表（[(标题,锚点) ...]）"""
-    toc_path = find_toc_path(epub_cache_folder)
-    if toc_path is None or not os.path.exists(toc_path):
+    toc_file_path = find_toc_path(epub_cache_folder)
+    if toc_file_path is None or not os.path.exists(toc_file_path):
         return []
-    tree = ET.parse(toc_path)
+    tree = ET.parse(toc_file_path)
+    toc_path_father = os.path.dirname(toc_file_path)
     root = tree.getroot()
     ns = {"ncx": "http://www.daisy.org/z3986/2005/ncx/"}
     toc = []
     for nav_point in root.findall(".//ncx:navPoint", ns):
         title = nav_point.find(".//ncx:text", ns).text
         anchor = nav_point.find(".//ncx:content", ns).attrib["src"]
-        toc.append((title, os.path.join(epub_cache_folder, anchor)))
+        toc.append((title, os.path.join(toc_path_father, anchor)))
     return toc
 
 
@@ -129,7 +130,7 @@ __all__ = ["load_epub", "parse_toc"]
 
 if __name__ == "__main__":
     # 示例：解析 EPUB 并打印章节
-    epub_path = "eBooks\\小逻辑 (黑格尔, 贺麟) (Z-Library).epub"
+    epub_path = "eBooks/小逻辑 (黑格尔, 贺麟) (Z-Library).epub"
     ebook_folder, chapter_path_list = load_epub(epub_path)
     print(f"eBook cache folder: {ebook_folder}")
     toc = parse_toc(ebook_folder)

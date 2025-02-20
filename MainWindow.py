@@ -2,34 +2,29 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtGui as qtg
 import PyQt6.QtCore as qtc
 from logger import logger
-from Ebook import EBook, EBookChapter, save_EBook_in_JSON, load_EBook_from_JSON
+from Ebook import EBook, EBookChapter, save_EBooks_in_JSON, load_EBooks_from_JSON
+from EBookTabWidget import EBookTabWidget
 
 index_html_path = "./html/test001.html"
 
 
 class MainWindow(qtw.QMainWindow):
-    _book: EBook | None = None
+    _ebook_list: list[EBook] = []
 
     def __init__(self):
         super().__init__()
         self.setup_ui()
+        self.load_last_read()
 
-        try:
-            self._book = load_EBook_from_JSON()
-        except FileNotFoundError:
-            logger.info("Saved EBook not found")
-            self._book = None
-
-        if self._book is not None:
-            self.update_html_browser(self._book.get_chapter())
-            self.update_toc_list()
-            self.highlight_current_chapter()
-        else:
-            self.update_html_browser()
+    def load_last_read(self):
+        last_read = load_EBooks_from_JSON()
+        for eBook in last_read:
+            self.load_epub_by_path(eBook.epub_path)
+            self._ebook_list[-1]._now_toc_idx = eBook._now_toc_idx
 
     def closeEvent(self, event: qtg.QCloseEvent):
-        if self._book is not None:
-            save_EBook_in_JSON(self._book)
+        if self._ebook_list:
+            save_EBooks_in_JSON(self._ebook_list)
         event.accept()
 
     def setup_ui(self):
@@ -56,14 +51,20 @@ class MainWindow(qtw.QMainWindow):
         self._toc_list.itemClicked.connect(self.load_anchor_by_click_toc)
         splitter.addWidget(self._toc_list)
 
-        self._html_browser = self.make_html_browser()
-        splitter.addWidget(self._html_browser)
+        self._tab_widget = qtw.QTabWidget()
+        splitter.addWidget(self._tab_widget)
+        self._tab_widget.currentChanged.connect(
+            self.on_tab_widget_current_changed)
 
         splitter.setSizes([200, 600])
 
         self._layout.addWidget(splitter)
 
+    def load_anchor_by_click_toc(self, item):
+        pass
+
     def make_tool_bar(self):
+        # TODO: Add more buttons
         tool_bar = qtw.QToolBar()
 
         prev_button = qtw.QToolButton()
@@ -84,7 +85,7 @@ class MainWindow(qtw.QMainWindow):
 
         file_menu = menu_bar.addMenu("File")
         open_action = file_menu.addAction("Open EPUB")
-        open_action.triggered.connect(self.load_epub)
+        open_action.triggered.connect(self.load_epub_by_dialog)
         open_action.setShortcut("Ctrl+O")
         exit_action = file_menu.addAction("Exit")
         exit_action.triggered.connect(self.close)
@@ -103,87 +104,55 @@ class MainWindow(qtw.QMainWindow):
 
         return menu_bar
 
-    def change_to_index_page(self):
-        self.update_html_browser()
-        self.update_toc_list()
-        self._book = None
-
-    def highlight_current_chapter(self):
-        if self._book is None:
-            return
-        self._toc_list.setCurrentRow(self._book._now_toc_idx)
-
-    def make_html_browser(self):
-        html_browser = qtw.QTextBrowser()
-        html_browser.setOpenExternalLinks(True)
-        return html_browser
-
-    def update_html_browser(self, eBookChapter: EBookChapter | None = None):
-        if eBookChapter is None:
-            self._html_browser.setSource(
-                qtc.QUrl.fromLocalFile(index_html_path))
-            self.setWindowTitle("QEpuber")
-            logger.info("Index page loaded")
+    def load_epub_by_path(self, epub_path):
+        if not epub_path:
+            logger.info("No file selected")
             return
 
-        self._html_browser.setSource(qtc.QUrl.fromLocalFile(eBookChapter.path))
-        self.setWindowTitle(f"QEpuber - {eBookChapter.title}")
-        logger.info(f"Chapter loaded: {eBookChapter.title}")
+        eBook = EBook(epub_path)
+        self._ebook_list.append(eBook)
+        now_chapter = eBook.get_chapter()
+        self._tab_widget.addTab(EBookTabWidget(now_chapter), now_chapter.title)
+        self._tab_widget.setCurrentIndex(self._tab_widget.count() - 1)
 
-        anchor = eBookChapter.get_anchor()
-        if anchor is not None:
-            self._html_browser.scrollToAnchor(anchor)
-            logger.info(f"Anchor loaded: {anchor}")
-
-    def load_anchor_by_click_toc(self, item: qtw.QListWidgetItem):
-        if self._book is None:
-            return
-        anchor_index = self._toc_list.row(item)
-        chapter_index = self._book.archor_idx_to_chapter_idx[anchor_index]
-        html_path = self._book.chapter_path_list[chapter_index]
-        anchor = self._book.anchor[anchor_index]
-        title = self._book.toc[anchor_index]
-        self._book._now_toc_idx = anchor_index
-        self.update_html_browser(EBookChapter(title, html_path, anchor))
-        self.highlight_current_chapter()
-
-    def update_toc_list(self):
         self._toc_list.clear()
-        if self._book is None:
-            return
-        for chapter in self._book.toc:
+        for chapter in eBook.toc:
             self._toc_list.addItem(chapter)
 
-    def load_epub(self):
+        self._toc_list.setCurrentRow(eBook._now_toc_idx)
+        self.setWindowTitle(f"QEpuber - {eBook.book_name}")
+
+    def load_epub_by_dialog(self):
         epub_path, _ = qtw.QFileDialog.getOpenFileName(
-            self, "打开 EPUB 文件", "", "EPUB 文件 (*.epub)")
-        if not epub_path:
-            logger.info("未选择 EPUB 文件")
-            return
-        logger.info(f"Loading EPUB: {epub_path}")
-        self._book = EBook(epub_path)
-        self.update_html_browser(self._book.get_chapter())
-        self.update_toc_list()
+            self, "Open EPUB", "", "EPUB Files (*.epub)")
+        self.load_epub_by_path(epub_path)
 
     def next_chapter(self):
-        if self._book is None:
-            qtw.QMessageBox.warning(
-                self, "Error", "No eBook loaded", qtw.QMessageBox.StandardButton.Ok)
-            return
-        self._book.next_chapter()
-        self.update_html_browser(self._book.get_chapter())
-        self.highlight_current_chapter()
-
-        logger.info(f"chapter changed to: {self._book._now_toc_idx}")
+        current_EBookTabWidget: EBookTabWidget = self._tab_widget.currentWidget()
+        current_idx = self._tab_widget.currentIndex()
+        eBook = self._ebook_list[current_idx]
+        next_chapter = eBook.next_chapter()
+        current_EBookTabWidget.load_chapter(next_chapter)
+        self._toc_list.setCurrentRow(eBook._now_toc_idx)
+        self._tab_widget.setTabText(current_idx, next_chapter.title)
 
     def prev_chapter(self):
-        if self._book is None:
-            qtw.QMessageBox.warning(
-                self, "Error", "No eBook loaded", qtw.QMessageBox.StandardButton.Ok)
-            return
-        self.update_html_browser()
-        self._book.prev_chapter()
-        self.update_html_browser(self._book.get_chapter())
-        self.highlight_current_chapter()
+        current_EBookTabWidget: EBookTabWidget = self._tab_widget.currentWidget()
+        current_idx = self._tab_widget.currentIndex()
+        eBook = self._ebook_list[current_idx]
+        prev_chapter = eBook.prev_chapter()
+        current_EBookTabWidget.load_chapter(prev_chapter)
+        self._toc_list.setCurrentRow(eBook._now_toc_idx)
+        self._tab_widget.setTabText(current_idx, prev_chapter.title)
 
-        logger.info(f"chapter changed to: {self._book._now_toc_idx}")
+    def change_to_index_page(self):
+        pass
+
+    def on_tab_widget_current_changed(self):
+        current_idx = self._tab_widget.currentIndex()
+        eBook = self._ebook_list[current_idx]
+        self._toc_list.clear()
+        for chapter in eBook.toc:
+            self._toc_list.addItem(chapter)
+        self._toc_list.setCurrentRow(eBook._now_toc_idx)
+        self.setWindowTitle(f"QEpuber - {eBook.book_name}")

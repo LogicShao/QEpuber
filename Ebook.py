@@ -1,5 +1,6 @@
-from ebookparser import load_epub, parse_toc
+from EBookParser import load_epub, parse_toc
 import json
+import os
 
 
 class EBookChapter:
@@ -20,6 +21,7 @@ class EBookChapter:
 class EBook:
     def __init__(self, epub_path, now_toc_idx=0):
         self.epub_path = epub_path
+        self.book_name = os.path.splitext(os.path.basename(epub_path))[0]
         self.cache_folder, self.chapter_path_list = load_epub(epub_path)
         self._now_toc_idx = now_toc_idx
         self.toc, self.anchor = zip(*parse_toc(self.cache_folder))
@@ -51,26 +53,32 @@ class EBook:
 last_read_JSON_path = "eBookCache/last_read.json"
 
 
-def save_EBook_in_JSON(eBook: EBook | None = None):
-    if eBook is None:
-        return
+def save_EBooks_in_JSON(eBooks: list[EBook]):
+    data = []
+    for eBook in eBooks:
+        data.append({
+            "epub_path": eBook.epub_path,
+            "now_toc_idx": eBook._now_toc_idx
+        })
     with open(last_read_JSON_path, "w") as f:
-        json.dump({"epub_path": eBook.epub_path,
-                   "now_toc_idx": eBook._now_toc_idx}, f)
+        f.write(json.dumps(data, indent=4))
 
 
-def load_EBook_from_JSON() -> EBook | None:
+def load_EBooks_from_JSON() -> list[EBook]:
     try:
         with open(last_read_JSON_path, "r") as f:
             last_read = json.load(f)
     except FileNotFoundError:
         return None
-    return EBook(last_read["epub_path"], last_read["now_toc_idx"])
+    eBooks = []
+    for data in last_read:
+        eBooks.append(EBook(data["epub_path"], data["now_toc_idx"]))
+    return eBooks
 
 
 if __name__ == "__main__":
     # Test
-    eBook = EBook("eBooks\\小逻辑 (黑格尔, 贺麟) (Z-Library).epub")
+    eBook = EBook("eBooks/魔法禁书目录 第01卷.epub")
     for chapter in eBook.chapter_path_list:
         print(chapter)
     for anchor, idx in zip(eBook.anchor, eBook.archor_idx_to_chapter_idx):
