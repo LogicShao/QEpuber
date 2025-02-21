@@ -22,4 +22,5 @@ class EBookTabWidget(qtw.QTextBrowser):
         local_url = qtc.QUrl.fromLocalFile(eBookChapter.path)
         self.setSource(local_url)
         self.scrollToAnchor(eBookChapter.get_anchor())
+        self.setWindowTitle(eBookChapter.title)
         logger.debug(f"Load chapter: {eBookChapter.title}")
