@@ -1,0 +1,5 @@
+<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+    <rect width="18" height="18" fill="#888888"/> <!-- 不透明的灰色背景 -->
+    <line x1="5" y1="5" x2="13" y2="13" stroke="white" stroke-width="2"/> <!-- 第一条斜线 -->
+    <line x1="13" y1="5" x2="5" y2="13" stroke="white" stroke-width="2"/> <!-- 第二条斜线 -->
+</svg>

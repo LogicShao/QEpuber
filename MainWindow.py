@@ -3,15 +3,13 @@ import PyQt6.QtGui as qtg
 import PyQt6.QtCore as qtc
 from logger import logger
 from Ebook import EBook
-from EBookTabWidget import EBookTabWidget
+from EBookTabWidget import EBookChapterDisplay, EBookTabWidget
 from Setting import SettingLoader, SettingSaver
 
 index_html_path = "./html/test001.html"
 
 
 class MainWindow(qtw.QMainWindow):
-    _ebook_list: list[EBook] = []
-
     def __init__(self):
         super().__init__()
         self.setup_ui()
@@ -24,7 +22,7 @@ class MainWindow(qtw.QMainWindow):
             self.load_epub(eBook)
         font = setting_loader.get_last_font()
         for i in range(self._tab_widget.count()):
-            cur_widget: EBookTabWidget = self._tab_widget.widget(i)
+            cur_widget: EBookChapterDisplay = self._tab_widget.widget(i)
             cur_widget.setFont(font)
         last_idx = setting_loader.get_last_idx()
         if last_idx is not None:
@@ -33,9 +31,11 @@ class MainWindow(qtw.QMainWindow):
 
     def closeEvent(self, event: qtg.QCloseEvent):
         setting_saver = SettingSaver()
-        if self._ebook_list:
+        if self._tab_widget.count() > 0:
+            ebook_list = [self._tab_widget.widget(i).eBook
+                          for i in range(self._tab_widget.count())]
             setting_saver.add_last_read_ebook(
-                self._ebook_list, self._tab_widget.currentIndex())
+                ebook_list, self._tab_widget.currentIndex())
             setting_saver.add_last_font(
                 self._tab_widget.currentWidget().font())
         setting_saver.save()
@@ -63,28 +63,35 @@ class MainWindow(qtw.QMainWindow):
         self._toc_list.itemClicked.connect(self.load_anchor_by_click_toc)
         splitter.addWidget(self._toc_list)
 
-        self._tab_widget = qtw.QTabWidget()
-        self._tab_widget.setTabsClosable(True)
-        self._tab_widget.tabCloseRequested.connect(self.remove_tab)
+        self._tab_widget = EBookTabWidget()
         splitter.addWidget(self._tab_widget)
         self._tab_widget.currentChanged.connect(
             self.on_tab_widget_current_changed)
+        self._tab_widget.tabCloseRequested.connect(self.remove_tab)
 
         splitter.setSizes([200, 600])
         self._layout.addWidget(splitter)
 
     def remove_tab(self, index):
         self._tab_widget.removeTab(index)
-        self._ebook_list.pop(index)
-
         logger.info(f"Remove tab {index}")
+
+        if self._tab_widget.count() == 0:
+            self.setWindowTitle("QEpuber")
+            self._toc_list.clear()
+            return
+
+        if index == self._tab_widget.count():
+            index -= 1
+        self._tab_widget.setCurrentIndex(index)
+        self.on_tab_widget_current_changed()
 
     def load_anchor_by_click_toc(self, item):
         current_idx = self._tab_widget.currentIndex()
-        eBook = self._ebook_list[current_idx]
+        eBook: EBook = self._tab_widget.currentWidget().eBook
         toc_index = self._toc_list.currentRow()
         eBook._now_toc_idx = toc_index
-        current_widget: EBookTabWidget = self._tab_widget.currentWidget()
+        current_widget: EBookChapterDisplay = self._tab_widget.currentWidget()
         current_widget.load_chapter(eBook.get_anchor())
         self._tab_widget.setTabText(current_idx, eBook.get_anchor().title)
 
@@ -105,17 +112,11 @@ class MainWindow(qtw.QMainWindow):
         file_button.setText("File")
         file_button.setMenu(file_menu)
         file_button.setPopupMode(
-            qtw.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
+            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
         tool_bar.addWidget(file_button)
 
         # create view menu and add next and previous actions
         view_menu = qtw.QMenu()
-        next_action = view_menu.addAction("Next Chapter")
-        next_action.triggered.connect(self.next_chapter)
-        next_action.setShortcut("]")
-        prev_action = view_menu.addAction("Previous Chapter")
-        prev_action.triggered.connect(self.prev_chapter)
-        prev_action.setShortcut("[")
         select_font_action = view_menu.addAction("Font")
         select_font_action.triggered.connect(self.update_font_for_tabs)
         set_font_color_action = view_menu.addAction("Font Color")
@@ -127,8 +128,36 @@ class MainWindow(qtw.QMainWindow):
         view_button.setText("View")
         view_button.setMenu(view_menu)
         view_button.setPopupMode(
-            qtw.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
+            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
         tool_bar.addWidget(view_button)
+
+        # settings menu
+        settings_menu = qtw.QMenu()
+        save_pre_setting_action = settings_menu.addAction("Save Settings")
+        save_pre_setting_action.setCheckable(True)
+
+        settings_button = qtw.QToolButton()
+        settings_button.setText("Settings")
+        settings_button.setMenu(settings_menu)
+        settings_button.setPopupMode(
+            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
+        tool_bar.addWidget(settings_button)
+
+        # eBook menu
+        ebook_menu = qtw.QMenu()
+        next_action = ebook_menu.addAction("Next Chapter")
+        next_action.triggered.connect(self.next_chapter)
+        next_action.setShortcut("]")
+        prev_action = ebook_menu.addAction("Previous Chapter")
+        prev_action.triggered.connect(self.prev_chapter)
+        prev_action.setShortcut("[")
+
+        ebook_button = qtw.QToolButton()
+        ebook_button.setText("EBook")
+        ebook_button.setMenu(ebook_menu)
+        ebook_button.setPopupMode(
+            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
+        tool_bar.addWidget(ebook_button)
 
         prev_button = qtw.QToolButton()
         prev_button.setIcon(qtg.QIcon("./figures/left_arrow.svg"))
@@ -160,7 +189,7 @@ class MainWindow(qtw.QMainWindow):
             return
         color = dialog.selectedColor()
         for i in range(self._tab_widget.count()):
-            cur_widget: EBookTabWidget = self._tab_widget.widget(i)
+            cur_widget: EBookChapterDisplay = self._tab_widget.widget(i)
             cur_widget.setTextColor(color)
         logger.info(f"Color changed to {color.name()}")
 
@@ -172,14 +201,13 @@ class MainWindow(qtw.QMainWindow):
             return
         font = dialog.selectedFont()
         for i in range(self._tab_widget.count()):
-            cur_widget: EBookTabWidget = self._tab_widget.widget(i)
+            cur_widget: EBookChapterDisplay = self._tab_widget.widget(i)
             cur_widget.setFont(font)
         logger.info(f"Font changed to {font.family()} {font.pointSize()}pt")
 
     def load_epub(self, eBook: EBook):
-        self._ebook_list.append(eBook)
         now_anchor = eBook.get_anchor()
-        tab_widget = EBookTabWidget(eBook)
+        tab_widget = EBookChapterDisplay(eBook)
         self._tab_widget.addTab(tab_widget, now_anchor.title)
         tab_widget.load_chapter(now_anchor)
         self._tab_widget.setCurrentIndex(self._tab_widget.count() - 1)
@@ -194,44 +222,50 @@ class MainWindow(qtw.QMainWindow):
         if not epub_path:
             logger.info("No file selected")
             return
-
-        eBook = EBook(epub_path)
-        self.load_epub(eBook)
+        self.load_epub(EBook(epub_path))
 
     def load_epub_by_dialog(self):
         epub_path, _ = qtw.QFileDialog.getOpenFileName(
             self, "Open EPUB", "", "EPUB Files (*.epub)")
-        self.load_epub_by_path(epub_path)
+        ebook = EBook(epub_path)
+        if ebook in self._tab_widget.get_opened_books():
+            self._tab_widget.setCurrentIndex(
+                self._tab_widget.get_opened_books().index(ebook))
+            return
+        self.load_epub(ebook)
 
     def next_chapter(self):
-        if len(self._ebook_list) == 0:
+        if self._tab_widget.count() == 0:
             qtw.QMessageBox.warning(
-                self, "Warning", "No eBook loaded", qtw.QMessageBox.StandardButton.Ok)
+                self, "Error", "No eBook loaded", qtw.QMessageBox.StandardButton.Ok)
             return
-        current_EBookTabWidget: EBookTabWidget = self._tab_widget.currentWidget()
+        current_EBookTabWidget: EBookChapterDisplay = self._tab_widget.currentWidget()
         current_idx = self._tab_widget.currentIndex()
-        eBook = self._ebook_list[current_idx]
+        eBook = current_EBookTabWidget.eBook
         next_chapter = eBook.next_anchor()
         current_EBookTabWidget.load_chapter(next_chapter)
         self._toc_list.setCurrentRow(eBook._now_toc_idx)
         self._tab_widget.setTabText(current_idx, next_chapter.title)
 
     def prev_chapter(self):
-        if len(self._ebook_list) == 0:
+        if self._tab_widget.count() == 0:
             qtw.QMessageBox.warning(
-                self, "Warning", "No eBook loaded", qtw.QMessageBox.StandardButton.Ok)
+                self, "Error", "No eBook loaded", qtw.QMessageBox.StandardButton.Ok)
             return
-        current_EBookTabWidget: EBookTabWidget = self._tab_widget.currentWidget()
+        current_EBookTabWidget: EBookChapterDisplay = self._tab_widget.currentWidget()
         current_idx = self._tab_widget.currentIndex()
-        eBook = self._ebook_list[current_idx]
+        eBook = current_EBookTabWidget.eBook
         prev_chapter = eBook.prev_anchor()
         current_EBookTabWidget.load_chapter(prev_chapter)
         self._toc_list.setCurrentRow(eBook._now_toc_idx)
         self._tab_widget.setTabText(current_idx, prev_chapter.title)
 
     def on_tab_widget_current_changed(self):
-        current_idx = self._tab_widget.currentIndex()
-        eBook = self._ebook_list[current_idx]
+        if self._tab_widget.count() == 0:
+            self.setWindowTitle("QEpuber")
+            self._toc_list.clear()
+            return
+        eBook: EBook = self._tab_widget.currentWidget().eBook
         self._toc_list.clear()
         for chapter in eBook.toc:
             self._toc_list.addItem(chapter)

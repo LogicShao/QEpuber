@@ -57,6 +57,11 @@ class EBook:
     def get_anchor_count(self):
         return len(self.toc)
 
+    def __eq__(self, value):
+        if isinstance(value, EBook):
+            return self.epub_path == value.epub_path
+        raise TypeError("EBook can only compare with EBook")
+
 
 last_read_JSON_path = "eBookCache/last_read.json"
 
