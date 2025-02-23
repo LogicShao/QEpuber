@@ -1,5 +1,4 @@
 from EBookParser import load_epub, parse_toc
-import json
 import os
 
 
@@ -61,32 +60,6 @@ class EBook:
         if isinstance(value, EBook):
             return self.epub_path == value.epub_path
         raise TypeError("EBook can only compare with EBook")
-
-
-last_read_JSON_path = "eBookCache/last_read.json"
-
-
-def save_EBooks_in_JSON(eBooks: list[EBook]):
-    data = []
-    for eBook in eBooks:
-        data.append({
-            "epub_path": eBook.epub_path,
-            "now_toc_idx": eBook._now_toc_idx
-        })
-    with open(last_read_JSON_path, "w") as f:
-        f.write(json.dumps(data, indent=4))
-
-
-def load_EBooks_from_JSON() -> list[EBook]:
-    try:
-        with open(last_read_JSON_path, "r") as f:
-            last_read = json.load(f)
-    except FileNotFoundError:
-        return None
-    eBooks = []
-    for data in last_read:
-        eBooks.append(EBook(data["epub_path"], data["now_toc_idx"]))
-    return eBooks
 
 
 if __name__ == "__main__":

@@ -5,13 +5,15 @@ from logger import logger
 from Ebook import EBook
 from EBookTabWidget import EBookChapterDisplay, EBookTabWidget
 from Setting import SettingLoader, SettingSaver
+from ThemeManager import ThemeManager, Theme
 
 index_html_path = "./html/test001.html"
 
 
 class MainWindow(qtw.QMainWindow):
-    def __init__(self):
+    def __init__(self, theme_manager: ThemeManager):
         super().__init__()
+        self.theme_manager = theme_manager
         self.setup_ui()
         self.load_last_settings()
 
@@ -32,8 +34,7 @@ class MainWindow(qtw.QMainWindow):
     def closeEvent(self, event: qtg.QCloseEvent):
         setting_saver = SettingSaver()
         if self._tab_widget.count() > 0:
-            ebook_list = [self._tab_widget.widget(i).eBook
-                          for i in range(self._tab_widget.count())]
+            ebook_list = self._tab_widget.get_opened_books()
             setting_saver.add_last_read_ebook(
                 ebook_list, self._tab_widget.currentIndex())
             setting_saver.add_last_font(
@@ -58,6 +59,7 @@ class MainWindow(qtw.QMainWindow):
 
         splitter = qtw.QSplitter(
             qtc.Qt.Orientation.Horizontal, self._central_widget)
+        splitter.setHandleWidth(0)
 
         self._toc_list = qtw.QListWidget()
         self._toc_list.itemClicked.connect(self.load_anchor_by_click_toc)
@@ -119,10 +121,7 @@ class MainWindow(qtw.QMainWindow):
         view_menu = qtw.QMenu()
         select_font_action = view_menu.addAction("Font")
         select_font_action.triggered.connect(self.update_font_for_tabs)
-        set_font_color_action = view_menu.addAction("Font Color")
-        set_font_color_action.triggered.connect(self.update_tab_text_color)
-        set_theme_color_action = view_menu.addAction("Theme Color")
-        set_theme_color_action.triggered.connect(self.update_theme_color)
+        set_theme_color_action = view_menu.addAction("Theme")
 
         view_button = qtw.QToolButton()
         view_button.setText("View")
@@ -171,27 +170,6 @@ class MainWindow(qtw.QMainWindow):
         tool_bar.addWidget(next_button)
 
         return tool_bar
-
-    def update_theme_color(self):
-        dialog = qtw.QColorDialog()
-        if dialog.exec() == qtw.QDialog.DialogCode.Rejected:
-            logger.info("Color change canceled")
-            return
-        color = dialog.selectedColor()
-        self.setStyleSheet(f"background-color: {color.name()};")
-        logger.info(f"Color changed to {color.name()}")
-        self.update()
-
-    def update_tab_text_color(self):
-        dialog = qtw.QColorDialog()
-        if dialog.exec() == qtw.QDialog.DialogCode.Rejected:
-            logger.info("Color change canceled")
-            return
-        color = dialog.selectedColor()
-        for i in range(self._tab_widget.count()):
-            cur_widget: EBookChapterDisplay = self._tab_widget.widget(i)
-            cur_widget.setTextColor(color)
-        logger.info(f"Color changed to {color.name()}")
 
     def update_font_for_tabs(self):
         dialog = qtw.QFontDialog()
