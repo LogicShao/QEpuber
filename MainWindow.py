@@ -1,10 +1,8 @@
-import PyQt6.QtWidgets as qtw
-import PyQt6.QtGui as qtg
-import PyQt6.QtCore as qtc
-from logger import logger
+from commom_import import *
 from Ebook import EBook
 from EBookTabWidget import EBookChapterDisplay, EBookTabWidget
 from Setting import SettingLoader, SettingSaver
+from EBookTocDocker import EBookTocDocker
 
 index_html_path = "./html/test001.html"
 
@@ -53,15 +51,21 @@ class MainWindow(qtw.QMainWindow):
         self._layout = qtw.QVBoxLayout()
         self._central_widget.setLayout(self._layout)
 
-        self._tool_bar = self.make_tool_bar()
-        self._layout.addWidget(self._tool_bar)
+        self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea,
+                        self.make_tool_bar())
 
         splitter = qtw.QSplitter(
             qtc.Qt.Orientation.Horizontal, self._central_widget)
 
+        left_splitter = qtw.QSplitter(
+            qtc.Qt.Orientation.Vertical, self._central_widget)
+
         self._toc_list = qtw.QListWidget()
         self._toc_list.itemClicked.connect(self.load_anchor_by_click_toc)
-        splitter.addWidget(self._toc_list)
+        left_splitter.addWidget(self._toc_list)
+        left_splitter.addWidget(EBookTocDocker())
+        left_splitter.setSizes([200, 400])
+        splitter.addWidget(left_splitter)
 
         self._tab_widget = EBookTabWidget()
         splitter.addWidget(self._tab_widget)
@@ -98,6 +102,7 @@ class MainWindow(qtw.QMainWindow):
     def make_tool_bar(self):
         # TODO: Add more buttons
         tool_bar = qtw.QToolBar()
+        tool_bar.setAllowedAreas(qtc.Qt.ToolBarArea.LeftToolBarArea)
 
         # create file menu and add open and exit actions
         file_menu = qtw.QMenu()
