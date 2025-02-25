@@ -6,8 +6,9 @@ import sys
 
 def main():
     app = QApplication(sys.argv)
-    ThemeManager.load_theme(app, Theme.DARK)
-    window = MainWindow()
+    theme_manager = ThemeManager(app)
+    theme_manager.load_theme(Theme.DEFAULT)
+    window = MainWindow(theme_manager)
     window.show()
     return app.exec()
 

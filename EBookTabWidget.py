@@ -2,35 +2,11 @@ from commom_import import *
 from Ebook import EBook, EBookChapter
 
 
-EBookTabWidgetStyle = """
-QTabWidget::pane { 
-    border: 2px solid #444; 
-    border-radius: 10px;
-}
-QTabBar::tab {
-    background: #222;
-    color: white;
-    padding: 8px;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    margin-right: 2px;
-}
-QTabBar::tab:selected {
-    background: #555;
-    font-weight: bold;
-}
-QTabBar::tab:hover {
-    background: #777;
-}
-"""
-
-
 class EBookTabCloseButton(qtw.QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(qtc.QSize(18, 18))  # 设置按钮大小
         self.hovered = False  # 记录鼠标悬停状态
-        self.setStyleSheet("border: none; background: transparent;")  # 去掉默认背景
         self.setIcon(qtg.QIcon("./figures/close_icon.svg"))  # 设置图标
 
     def enterEvent(self, event):
@@ -94,7 +70,6 @@ class EBookTabWidget(qtw.QTabWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTabsClosable(True)
-        self.setStyleSheet(EBookTabWidgetStyle)
         self.setTabBar(EBookTabBar())
 
     def add_tab(self, eBook: EBook, eBookChapter: EBookChapter):
