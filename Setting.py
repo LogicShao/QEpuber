@@ -28,6 +28,9 @@ class SettingSaver:
             "italic": font.italic()
         }
 
+    def add_opened_ebooks_path(self, eBookPaths: set[str]):
+        self.setting["opened_ebooks_path"] = list(eBookPaths)
+
     def save(self):
         with open(setting_path, "w") as f:
             json.dump(self.setting, f, indent=4)
@@ -66,3 +69,8 @@ class SettingLoader:
         font.setBold(font_data["bold"])
         font.setItalic(font_data["italic"])
         return font
+
+    def get_opened_ebooks_path(self) -> set[str]:
+        if "opened_ebooks_path" not in self.setting:
+            return set()
+        return set(self.setting["opened_ebooks_path"])

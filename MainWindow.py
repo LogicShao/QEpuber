@@ -12,6 +12,7 @@ class MainWindow(qtw.QMainWindow):
     def __init__(self, theme_manager: ThemeManager):
         super().__init__()
         self.theme_manager = theme_manager
+        self.opened_ebooks_path: set[str] = set()
         self.setup_ui()
         self.load_last_settings()
 
@@ -37,6 +38,7 @@ class MainWindow(qtw.QMainWindow):
                 ebook_list, self._tab_widget.currentIndex())
             setting_saver.add_last_font(
                 self._tab_widget.currentWidget().font())
+            setting_saver.add_opened_ebooks_path(self.opened_ebooks_path)
         setting_saver.save()
         logger.info("Settings saved")
         event.accept()
@@ -104,6 +106,7 @@ class MainWindow(qtw.QMainWindow):
         # TODO: Add more buttons
         tool_bar = qtw.QToolBar()
         tool_bar.setAllowedAreas(qtc.Qt.ToolBarArea.LeftToolBarArea)
+        tool_bar.setMovable(False)
 
         # create file menu and add open and exit actions
         file_menu = qtw.QMenu()
@@ -115,10 +118,10 @@ class MainWindow(qtw.QMainWindow):
         exit_action.setShortcut("Ctrl+Q")
 
         file_button = qtw.QToolButton()
-        file_button.setText("File")
+        file_button.setIcon(qtg.QIcon("./figures/file_menu_bar.svg"))
         file_button.setMenu(file_menu)
         file_button.setPopupMode(
-            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
+            qtw.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
         tool_bar.addWidget(file_button)
 
         # create view menu and add next and previous actions
@@ -128,10 +131,10 @@ class MainWindow(qtw.QMainWindow):
         set_theme_color_action = view_menu.addAction("Theme")
 
         view_button = qtw.QToolButton()
-        view_button.setText("View")
+        view_button.setIcon(qtg.QIcon("./figures/view_menu_bar.svg"))
         view_button.setMenu(view_menu)
         view_button.setPopupMode(
-            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
+            qtw.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
         tool_bar.addWidget(view_button)
 
         # settings menu
@@ -140,10 +143,10 @@ class MainWindow(qtw.QMainWindow):
         save_pre_setting_action.setCheckable(True)
 
         settings_button = qtw.QToolButton()
-        settings_button.setText("Settings")
+        settings_button.setIcon(qtg.QIcon("./figures/settings_menu_bar.svg"))
         settings_button.setMenu(settings_menu)
         settings_button.setPopupMode(
-            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
+            qtw.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
         tool_bar.addWidget(settings_button)
 
         # eBook menu
@@ -156,18 +159,20 @@ class MainWindow(qtw.QMainWindow):
         prev_action.setShortcut("[")
 
         ebook_button = qtw.QToolButton()
-        ebook_button.setText("EBook")
+        ebook_icon = qtg.QIcon("./figures/ebook_menu_bar.svg")
+        ebook_pix = ebook_icon.pixmap(25, 32)
+        ebook_button.setIcon(qtg.QIcon(ebook_pix))
         ebook_button.setMenu(ebook_menu)
         ebook_button.setPopupMode(
-            qtw.QToolButton.ToolButtonPopupMode.InstantPopup)
+            qtw.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
         tool_bar.addWidget(ebook_button)
 
         prev_button = qtw.QToolButton()
-        prev_button.setIcon(qtg.QIcon("./figures/left_arrow.svg"))
+        prev_button.setIcon(qtg.QIcon("./figures/up_arrow.svg"))
         prev_button.clicked.connect(self.prev_chapter)
 
         next_button = qtw.QToolButton()
-        next_button.setIcon(qtg.QIcon("./figures/right_arrow.svg"))
+        next_button.setIcon(qtg.QIcon("./figures/down_arrow.svg"))
         next_button.clicked.connect(self.next_chapter)
 
         tool_bar.addWidget(prev_button)
@@ -199,6 +204,8 @@ class MainWindow(qtw.QMainWindow):
             self._toc_list.addItem(chapter)
         self._toc_list.setCurrentRow(eBook._now_toc_idx)
         self.setWindowTitle(f"QEpuber - {eBook.book_name}")
+
+        self.opened_ebooks_path.add(eBook.epub_path)
 
     def load_epub_by_path(self, epub_path):
         if not epub_path:

@@ -7,7 +7,7 @@ import sys
 def main():
     app = QApplication(sys.argv)
     theme_manager = ThemeManager(app)
-    theme_manager.load_theme(Theme.DEFAULT)
+    theme_manager.load_theme(Theme.LIGHT)
     window = MainWindow(theme_manager)
     window.show()
     return app.exec()

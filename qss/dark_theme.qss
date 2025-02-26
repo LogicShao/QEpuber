@@ -1,3 +1,11 @@
+QWidget {
+    background-color: #2b2b2b;
+    color: #dddddd;
+    selection-background-color: #0078d7;
+    selection-color: white;
+    font-size: 14px;
+}
+
 /* begin QPushButton */
 QPushButton {
     background-color: #555555;
