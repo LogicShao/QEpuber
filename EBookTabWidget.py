@@ -5,9 +5,12 @@ from Ebook import EBook, EBookChapter
 class EBookTabCloseButton(qtw.QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(qtc.QSize(18, 18))  # 设置按钮大小
+        self.setFixedSize(qtc.QSize(20, 20))  # 稍微增大按钮尺寸
         self.hovered = False  # 记录鼠标悬停状态
+        self.setObjectName("tabCloseButton")  # 设置对象名称以应用样式
         self.setIcon(qtg.QIcon("./figures/close_icon.svg"))  # 设置图标
+        self.setToolTip("关闭标签页")
+        self.setFlat(True)  # 扁平样式
 
     def enterEvent(self, event):
         """鼠标进入按钮时"""
@@ -26,7 +29,10 @@ class EBookTabBar(qtw.QTabBar):
     def __init__(self):
         super().__init__()
         self.setTabsClosable(True)  # 允许关闭按钮
-        self.setMovable(True)
+        self.setMovable(True)  # 允许拖拽标签页
+        self.setExpanding(False)  # 不自动扩展标签页宽度
+        self.setElideMode(qtc.Qt.TextElideMode.ElideRight)  # 文本过长时省略号在右侧
+        self.setUsesScrollButtons(True)  # 当标签页过多时显示滚动按钮
 
     def tabInserted(self, index):
         """在插入标签时自定义关闭按钮"""
@@ -47,7 +53,15 @@ class EBookChapterDisplay(qtw.QTextBrowser):
         self.setOpenExternalLinks(True)
         self.setOpenLinks(True)
         self.setAcceptRichText(True)
-        self.setContextMenuPolicy(qtc.Qt.ContextMenuPolicy.NoContextMenu)
+        self.setContextMenuPolicy(qtc.Qt.ContextMenuPolicy.DefaultContextMenu)
+        self.setObjectName("bookDisplay")  # 设置对象名称以应用样式
+
+        # 设置更好的阅读体验
+        self.setLineWrapMode(qtw.QTextEdit.LineWrapMode.WidgetWidth)
+        self.setVerticalScrollBarPolicy(
+            qtc.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(
+            qtc.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def load_chapter(self, eBookChapter: EBookChapter):
         local_url = qtc.QUrl.fromLocalFile(eBookChapter.path)

@@ -4,47 +4,254 @@ QWidget {
     selection-background-color: #0078d7;
     selection-color: white;
     font-size: 14px;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
 }
 
+/* 主窗口样式 */
+QMainWindow {
+    background-color: #f5f5f5;
+    border: none;
+}
+
+/* 工具栏样式 */
+QToolBar {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                stop: 0 #ffffff, stop: 1 #f0f0f0);
+    border: none;
+    border-right: 1px solid #d0d0d0;
+    padding: 4px;
+}
+
+QToolButton[objectName="toolbarButton"] {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px;
+    margin: 2px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+QToolButton[objectName="toolbarButton"]:hover {
+    background-color: #e6e6e6;
+    border-color: #cccccc;
+}
+
+QToolButton[objectName="toolbarButton"]:pressed {
+    background-color: #d4d4d4;
+    border-color: #999999;
+}
+
+QToolButton[objectName="navButton"] {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    padding: 6px;
+    margin: 2px;
+    min-width: 28px;
+    min-height: 28px;
+}
+
+QToolButton[objectName="navButton"]:hover {
+    background-color: #f0f0f0;
+    border-color: #0078d7;
+}
+
+QToolButton[objectName="navButton"]:pressed {
+    background-color: #0078d7;
+    border-color: #005a9e;
+    color: white;
+}
+
+/* 按钮样式 */
 QPushButton {
-    background-color: #DDDDDD;
-    color: black;
-    border-radius: 0px;
-    padding: 5px;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #ffffff, stop: 1 #f0f0f0);
+    color: #333333;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    min-height: 20px;
 }
 
 QPushButton:hover {
-    background-color: #BBBBBB;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #f8f8f8, stop: 1 #e8e8e8);
+    border-color: #0078d7;
 }
 
+QPushButton:pressed {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #e0e0e0, stop: 1 #d0d0d0);
+    border-color: #005a9e;
+}
+
+/* 标签页样式 */
 QTabWidget::pane {
-    border: 1px solid #CCCCCC;
+    border: 1px solid #cccccc;
+    background-color: #ffffff;
+    border-radius: 6px;
 }
 
-QListWidget {
-    background: #f5f5f5;
-    border: 2px solid #ccc;
-    border-radius: 0px;
-    padding: 5px;
-    color: black;
+QTabBar::tab {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #f8f8f8, stop: 1 #e8e8e8);
+    color: #333333;
+    border: 1px solid #cccccc;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 8px 16px;
+    margin-right: 2px;
+    min-width: 80px;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #0078d7, stop: 1 #005a9e);
+    color: white;
+    border-color: #0078d7;
+    font-weight: bold;
+}
+
+QTabBar::tab:hover:!selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #ffffff, stop: 1 #f0f0f0);
+    border-color: #999999;
+}
+
+/* TOC标签样式 */
+QLabel[objectName="tocLabel"] {
+    color: #333333;
+    font-weight: bold;
     font-size: 14px;
+    padding: 4px 8px;
+    background-color: #e8e8e8;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+/* 列表控件样式 */
+QListWidget {
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    padding: 4px;
+    color: #333333;
+    font-size: 14px;
+    outline: none;
 }
 
 QListWidget::item {
-    background: white;
-    padding: 8px;
-    margin: 4px 2px;
-    border-radius: 3px;
+    background: transparent;
+    padding: 10px 12px;
+    margin: 2px;
+    border-radius: 4px;
+    border: none;
 }
 
 QListWidget::item:selected {
-    background: #0078d7;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #0078d7, stop: 1 #005a9e);
     color: white;
     font-weight: bold;
 }
 
-QListWidget::item:hover {
-    background: #e0e0e0;
+QListWidget::item:hover:!selected {
+    background-color: #f0f0f0;
+}
+
+/* 分割器样式 */
+QSplitter {
+    background-color: #f5f5f5;
+}
+
+QSplitter[objectName="mainSplitter"]::handle {
+    background-color: #d0d0d0;
+    width: 4px;
+    border-radius: 2px;
+    margin: 2px;
+}
+
+QSplitter[objectName="leftSplitter"]::handle {
+    background-color: #d0d0d0;
+    height: 3px;
+    border-radius: 1px;
+    margin: 2px;
+}
+
+/* 标签页关闭按钮样式 */
+QPushButton[objectName="tabCloseButton"] {
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 2px;
+}
+
+QPushButton[objectName="tabCloseButton"]:hover {
+    background-color: #e6e6e6;
+}
+
+QPushButton[objectName="tabCloseButton"]:pressed {
+    background-color: #d4d4d4;
+}
+
+/* 滚动条样式 */
+QScrollBar:vertical {
+    background: #f0f0f0;
+    width: 12px;
+    border: none;
+    border-radius: 6px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                stop: 0 #cccccc, stop: 1 #bbbbbb);
+    border-radius: 6px;
+    min-height: 30px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                stop: 0 #aaaaaa, stop: 1 #999999);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* 电子书显示区域 */
+QTextBrowser[objectName="bookDisplay"] {
+    background: #ffffff;
+    color: #333333;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.8;
+    selection-background-color: #0078d7;
+    selection-color: white;
+}
+
+/* 状态栏样式 */
+QStatusBar {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #ffffff, stop: 1 #f0f0f0);
+    color: #555555;
+    border-top: 1px solid #cccccc;
+    padding: 2px 8px;
+    font-size: 12px;
 }
 
 QSlider {

@@ -4,50 +4,190 @@ QWidget {
     selection-background-color: #0078d7;
     selection-color: white;
     font-size: 14px;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
 }
 
-/* begin QPushButton */
-QPushButton {
+/* 主窗口样式 */
+QMainWindow {
+    background-color: #2b2b2b;
+    border: none;
+}
+
+/* 工具栏样式 */
+QToolBar {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                stop: 0 #3a3a3a, stop: 1 #2b2b2b);
+    border: none;
+    border-right: 1px solid #404040;
+    padding: 4px;
+}
+
+QToolButton[objectName="toolbarButton"] {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px;
+    margin: 2px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+QToolButton[objectName="toolbarButton"]:hover {
+    background-color: #444444;
+    border-color: #555555;
+}
+
+QToolButton[objectName="toolbarButton"]:pressed {
     background-color: #555555;
+    border-color: #666666;
+}
+
+QToolButton[objectName="navButton"] {
+    background-color: #404040;
+    border: 1px solid #555555;
+    border-radius: 6px;
+    padding: 6px;
+    margin: 2px;
+    min-width: 28px;
+    min-height: 28px;
+}
+
+QToolButton[objectName="navButton"]:hover {
+    background-color: #505050;
+    border-color: #0078d7;
+}
+
+QToolButton[objectName="navButton"]:pressed {
+    background-color: #0078d7;
+    border-color: #005a9e;
+}
+
+/* 分割器样式 */
+QSplitter {
+    background-color: #2b2b2b;
+}
+
+QSplitter[objectName="mainSplitter"]::handle {
+    background-color: #404040;
+    width: 4px;
+    border-radius: 2px;
+    margin: 2px;
+}
+
+QSplitter[objectName="leftSplitter"]::handle {
+    background-color: #404040;
+    height: 3px;
+    border-radius: 1px;
+    margin: 2px;
+}
+
+/* 按钮样式 */
+QPushButton {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #555555, stop: 1 #444444);
     color: white;
-    border-radius: 0px;
-    padding: 5px;
+    border: 1px solid #666666;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    min-height: 20px;
 }
 
 QPushButton:hover {
-    background-color: #777777;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #666666, stop: 1 #555555);
+    border-color: #0078d7;
 }
-/* end QPushButton */
 
-/* begin QTabWidget */
+QPushButton:pressed {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #444444, stop: 1 #333333);
+    border-color: #005a9e;
+}
+
+QPushButton:disabled {
+    background: #3a3a3a;
+    color: #666666;
+    border-color: #505050;
+}
+
+/* 标签页样式 */
 QTabWidget::pane {
     border: 1px solid #444444;
+    background-color: #2b2b2b;
+    border-radius: 6px;
 }
 
-QListWidget {
-    background: #2b2b2b;
-    border: 2px solid #444;
-    border-radius: 0px;
-    padding: 5px;
+QTabWidget::tab-bar {
+    alignment: center;
+}
+
+QTabBar::tab {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #404040, stop: 1 #353535);
+    color: #cccccc;
+    border: 1px solid #555555;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 8px 16px;
+    margin-right: 2px;
+    min-width: 80px;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #0078d7, stop: 1 #005a9e);
     color: white;
-    font-size: 14px;
-}
-
-QListWidget::item {
-    background: #333;
-    padding: 8px;
-    margin: 4px 2px;
-    border-radius: 3px;
-}
-
-QListWidget::item:selected {
-    background: #555;
-    color: #fff;
+    border-color: #0078d7;
     font-weight: bold;
 }
 
-QListWidget::item:hover {
-    background: #666;
+QTabBar::tab:hover:!selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #505050, stop: 1 #454545);
+    border-color: #666666;
+}
+
+/* TOC标签样式 */
+QLabel[objectName="tocLabel"] {
+    color: #cccccc;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 8px;
+    background-color: #353535;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+/* 列表控件样式 */
+QListWidget {
+    background: #323232;
+    border: 1px solid #555555;
+    border-radius: 6px;
+    padding: 4px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+QListWidget::item {
+    background: transparent;
+    padding: 10px 12px;
+    margin: 2px;
+    border-radius: 4px;
+    border: none;
+}
+
+QListWidget::item:selected {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #0078d7, stop: 1 #005a9e);
+    color: white;
+    font-weight: bold;
+}
+
+QListWidget::item:hover:!selected {
+    background-color: #444444;
 }
 
 QSlider {
@@ -107,14 +247,75 @@ QSlider::add-page:vertical {
     background: #222;
 }
 
-EBookChapterDisplay {
+/* 标签页关闭按钮样式 */
+QPushButton[objectName="tabCloseButton"] {
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 2px;
+}
+
+QPushButton[objectName="tabCloseButton"]:hover {
+    background-color: #666666;
+}
+
+QPushButton[objectName="tabCloseButton"]:pressed {
+    background-color: #777777;
+}
+
+/* 滚动条样式 */
+QScrollBar:vertical {
+    background: #3a3a3a;
+    width: 12px;
+    border: none;
+    border-radius: 6px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                stop: 0 #666666, stop: 1 #555555);
+    border-radius: 6px;
+    min-height: 30px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                stop: 0 #777777, stop: 1 #666666);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* 电子书显示区域 */
+QTextBrowser[objectName="bookDisplay"] {
     background: #2b2b2b;
     color: #dddddd;
-    border: 2px solid #444;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 20px;
-    line-height: 1.6;
+    border: 1px solid #555555;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.8;
     selection-background-color: #0078d7;
     selection-color: white;
+}
+
+/* 状态栏样式 */
+QStatusBar {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #3a3a3a, stop: 1 #2b2b2b);
+    color: #cccccc;
+    border-top: 1px solid #555555;
+    padding: 2px 8px;
+    font-size: 12px;
 }
