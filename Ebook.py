@@ -1,5 +1,6 @@
-from EBookParser import load_epub, parse_toc
 import os
+
+from EBookParser import load_epub, parse_toc
 
 
 class EBookChapter:
@@ -33,13 +34,13 @@ class EBook:
     def next_anchor(self):
         """get next anchor in toc"""
         self._now_toc_idx = (
-            self._now_toc_idx + 1) % self.get_anchor_count()
+                                    self._now_toc_idx + 1) % self.get_anchor_count()
         return self.get_anchor()
 
     def prev_anchor(self):
         """get previous anchor in toc"""
         self._now_toc_idx = (
-            self._now_toc_idx - 1) % self.get_anchor_count()
+                                    self._now_toc_idx - 1) % self.get_anchor_count()
         return self.get_anchor()
 
     def get_anchor(self, toc_index: int | None = None) -> EBookChapter:

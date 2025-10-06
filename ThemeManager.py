@@ -1,5 +1,6 @@
-from commom_import import *
 from enum import Enum
+
+from commom_import import *
 
 
 class Theme(Enum):

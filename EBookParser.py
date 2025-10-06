@@ -1,9 +1,10 @@
-from ebooklib import epub
-from bs4 import BeautifulSoup
-import xml.etree.ElementTree as ET
-import warnings
 import os
+import warnings
+import xml.etree.ElementTree as ET
 import zipfile
+
+from bs4 import BeautifulSoup
+from ebooklib import epub
 
 
 def extract_chapters(epub_path):

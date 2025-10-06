@@ -1,5 +1,5 @@
-from commom_import import *
 from Ebook import EBook, EBookChapter
+from commom_import import *
 
 
 class EBookTabCloseButton(qtw.QPushButton):

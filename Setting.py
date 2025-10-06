@@ -1,6 +1,8 @@
 import json
-from Ebook import EBook
+
 from PyQt6.QtGui import QFont
+
+from Ebook import EBook
 
 setting_path = "./eBookCache/pre_settings.json"
 

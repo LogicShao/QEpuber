@@ -1,9 +1,9 @@
-from commom_import import *
-from Ebook import EBook
 from EBookTabWidget import EBookChapterDisplay, EBookTabWidget
-from Setting import SettingLoader, SettingSaver
 from EBookTocDocker import EBookTocDocker
+from Ebook import EBook
+from Setting import SettingLoader, SettingSaver
 from ThemeManager import ThemeManager, Theme
+from commom_import import *
 
 index_html_path = "./html/test001.html"
 

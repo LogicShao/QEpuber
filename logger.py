@@ -12,7 +12,7 @@ console_handler.setLevel(logging.INFO)
 # 创建文件处理程序并设置级别为INFO
 log_file = "QEpuber.log"
 file_handler = RotatingFileHandler(
-    log_file, maxBytes=5*1024, backupCount=0, encoding='utf-8')
+    log_file, maxBytes=5 * 1024, backupCount=0, encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 
 # 创建格式化器并将其添加到处理程序

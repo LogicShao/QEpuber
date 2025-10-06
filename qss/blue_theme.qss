@@ -37,7 +37,6 @@ QToolButton[objectName="toolbarButton"]:hover {
     background: qradialgradient(cx: 0.5, cy: 0.5, radius: 1,
                                 fx: 0.5, fy: 0.5, stop: 0 #bbdefb, stop: 1 #e3f2fd);
     border-color: #2196f3;
-    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
 QToolButton[objectName="toolbarButton"]:pressed {
@@ -61,7 +60,6 @@ QToolButton[objectName="navButton"]:hover {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #bbdefb, stop: 1 #e3f2fd);
     border-color: #2196f3;
-    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.4);
 }
 
 QToolButton[objectName="navButton"]:pressed {
@@ -87,7 +85,6 @@ QPushButton:hover {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #e3f2fd, stop: 1 #bbdefb);
     border-color: #2196f3;
-    box-shadow: 0 3px 8px rgba(33, 150, 243, 0.3);
 }
 
 QPushButton:pressed {
@@ -177,7 +174,6 @@ QListWidget::item:selected {
                                 stop: 0 #2196f3, stop: 1 #1976d2);
     color: white;
     font-weight: bold;
-    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.4);
 }
 
 QListWidget::item:hover:!selected {
@@ -228,13 +224,11 @@ QSlider::handle:horizontal {
     height: 18px;
     margin: -5px 0;
     border-radius: 9px;
-    box-shadow: 0 2px 4px rgba(21, 101, 192, 0.3);
 }
 
 QSlider::handle:horizontal:hover {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #42a5f5, stop: 1 #2196f3);
-    box-shadow: 0 3px 6px rgba(21, 101, 192, 0.4);
 }
 
 QSlider::sub-page:horizontal {
